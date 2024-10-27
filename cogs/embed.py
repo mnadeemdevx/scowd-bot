@@ -1,7 +1,6 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils.embed import create_custom_embed
 from bot import MyBot
 
 
@@ -13,6 +12,9 @@ class EmbedCog(commands.Cog):
             "description": "Description",
             "color": 0xFFFFFF,
             "footer_message": "Footer Message",
+            "image": "https://cdn.discordapp.com/attachments/853174868551532564/860462053063393280/embed_image.png?ex=671f62bc&is=671e113c&hm=3300b3cdb691362c13ebc441ea32fb71af28aad9bca49dc1355f5bb786dbf3c4&",
+            "thumbnail": "https://cdn.discordapp.com/attachments/853174868551532564/860464565338898472/embed_thumbnail.png?ex=671f6513&is=671e1393&hm=440f2884c11cebdfbcb7201d478e4b1040fffb9686ef5855a9cc45f853f2834e&",
+            "footer": "https://cdn.discordapp.com/attachments/853174868551532564/860464565338898472/embed_thumbnail.png?ex=671f6513&is=671e1393&hm=440f2884c11cebdfbcb7201d478e4b1040fffb9686ef5855a9cc45f853f2834e&",
         }
 
     @app_commands.command(
@@ -28,14 +30,14 @@ class EmbedCog(commands.Cog):
                 color=self.embed_data["color"],
             )
             embed.set_image(
-                url="https://cdn.discordapp.com/attachments/853174868551532564/860462053063393280/embed_image.png?ex=671f62bc&is=671e113c&hm=3300b3cdb691362c13ebc441ea32fb71af28aad9bca49dc1355f5bb786dbf3c4&"
+                url=self.embed_data["image"],
             )
             embed.set_footer(
                 text=self.embed_data["footer_message"],
-                icon_url="https://cdn.discordapp.com/attachments/853174868551532564/860464565338898472/embed_thumbnail.png?ex=671f6513&is=671e1393&hm=440f2884c11cebdfbcb7201d478e4b1040fffb9686ef5855a9cc45f853f2834e&",
+                icon_url=self.embed_data["footer"],
             )
             embed.set_thumbnail(
-                url="https://cdn.discordapp.com/attachments/853174868551532564/860464565338898472/embed_thumbnail.png?ex=671f6513&is=671e1393&hm=440f2884c11cebdfbcb7201d478e4b1040fffb9686ef5855a9cc45f853f2834e&"
+                url=self.embed_data["thumbnail"],
             )
             await interaction.response.defer(thinking=True)
             dropdown = EmbedDropDown()
@@ -134,7 +136,7 @@ class SendButton(discord.ui.Button):
         message = await self.channel.send(embed=self.embed)
         jump_url = f"https://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}"
         await interaction.response.send_message(
-            f"<:green_tick:1300171482491781280>〡Embed was sent to {self.channel.mention} ([Jump URL]({jump_url}))",
+            f"<:green_tick:1300171482491781280> | Embed was sent to {self.channel.mention} ([Jump URL]({jump_url}))",
             ephemeral=True,
         )
         for item in self.view.children:
@@ -149,7 +151,7 @@ class CancelButton(discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         # Notify user of cancellation
         await interaction.response.send_message(
-            "<:red_tick:1300171587944976426>〡Embed sending cancelled.", ephemeral=True
+            "<:red_tick:1300171587944976426> | Embed sending cancelled.", ephemeral=True
         )
         # Disable all components after canceling
         for item in self.view.children:
