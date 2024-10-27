@@ -2,10 +2,11 @@ import discord
 from discord.ext import commands
 from datetime import datetime
 from utils.embed import create_log_embed
+from bot import MyBot
 
 
 class LoggingCog(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: MyBot):
         self.bot = bot
         self.LOGGING_CHANNELS = {
             1069495495568916480: 1296823358129705093,
@@ -14,13 +15,13 @@ class LoggingCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
-        if not before.guild:
+        if not before.guild or before.author.bot:
             return
         await self.log_message(before.guild.id, create_log_embed(before, after, "edit"))
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
-        if not message.guild:
+        if not message.guild or message.author.bot:
             return
         await self.log_message(
             message.guild.id, create_log_embed(message, None, "delete")
@@ -34,5 +35,5 @@ class LoggingCog(commands.Cog):
                 await logging_channel.send(embed=embed)
 
 
-async def setup(bot):
+async def setup(bot: MyBot):
     await bot.add_cog(LoggingCog(bot))

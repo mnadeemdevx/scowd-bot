@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from utils.captcha import generate_captcha
+from bot import MyBot
 
 
 class VerificationCog(commands.Cog):
@@ -16,7 +17,7 @@ class VerificationCog(commands.Cog):
     async def send_verification(
         self, interation: discord.Interaction, title: str, description: str
     ):
-        embed = discord.Embed(title=title, description=description, color=0x3498DB)
+        embed = discord.Embed(title=title, description=description, color=0xFFFFFF)
         view = VerificationView(self.bot)
 
         await interation.response.send_message(embed=embed, view=view)
@@ -42,7 +43,7 @@ class VerificationView(discord.ui.View):
         embed = discord.Embed(
             title="Captcha Verification",
             description="Remember the characters and click **Solve** to enter them.",
-            color=0x3498DB,
+            color=0xFFFFFF,
         ).set_image(url="attachment://captcha.png")
 
         view = CaptchaView(self.bot)
@@ -81,7 +82,7 @@ class CaptchaView(discord.ui.View):
         new_embed = discord.Embed(
             title="Captcha Verification",
             description="Remember the characters and click **Solve** to enter them.",
-            color=0x3498DB,
+            color=0xFFFFFF,
         ).set_image(url="attachment://captcha.png")
 
         await interaction.edit_original_response(
@@ -129,5 +130,5 @@ class SolveModalInfo(discord.ui.Modal, title="Verify Captcha"):
             )
 
 
-async def setup(bot):
+async def setup(bot: MyBot):
     await bot.add_cog(VerificationCog(bot))
