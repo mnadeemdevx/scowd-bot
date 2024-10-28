@@ -40,7 +40,7 @@ class EmbedCog(commands.Cog):
                 url=self.embed_data["thumbnail"],
             )
             await interaction.response.defer(thinking=True)
-            dropdown = EmbedDropDown()
+            dropdown = EmbedDropDown(self.bot, self.embed_data)
             view = EmbedDropDownView(dropdown, channel, embed)
             message = await interaction.followup.send(
                 embed=embed, view=view, ephemeral=True
@@ -59,7 +59,7 @@ class EmbedCog(commands.Cog):
 
 
 class EmbedDropDown(discord.ui.Select):
-    def __init__(self):
+    def __init__(self, bot, embed_data):
         options = [
             discord.SelectOption(
                 label="Edit Message (Title, Description, Footer)",
@@ -95,11 +95,15 @@ class EmbedDropDown(discord.ui.Select):
         super().__init__(
             placeholder="Select an option to design the message", options=options
         )
+        self.bot = bot
+        self.embed_data = embed_data
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            f"You selected {self.values[0]}", ephemeral=True
+        option_value = None
+        modal = EmbedModal(
+            bot=self.bot, embed_data=self.embed_data, option_value=option_value
         )
+        await interaction.response.send_modal(modal)
 
 
 class EmbedDropDownView(discord.ui.View):
@@ -157,6 +161,59 @@ class CancelButton(discord.ui.Button):
         for item in self.view.children:
             item.disabled = True
         await interaction.message.edit(view=self.view)
+
+
+class EmbedModal(discord.ui.Modal, title="Set Embed Message"):
+    def __init__(self, bot, embed_data, option_value):
+        super().__init__()
+        self.bot = bot
+        self.embed_data = embed_data
+        self.option_value = option_value
+
+        if self.option_value == 0:
+            self.add_item(
+                discord.ui.TextInput(
+                    label="Title",
+                    placeholder="Enter text for title of embed here...",
+                    default=self.embed_data["title"],
+                    required=False,
+                )
+            )
+            self.add_item(
+                discord.ui.TextInput(
+                    label="Description",
+                    placeholder="Enter text for description of embed here...",
+                    default=self.embed_data["description"],
+                    required=False,
+                    max_length=4000,
+                    style=discord.TextStyle.paragraph,
+                )
+            )
+            self.add_item(
+                discord.ui.TextInput(
+                    label="Footer Text",
+                    placeholder="Enter text for footer of embed here...",
+                    default=self.embed_data["footer_message"],
+                    required=False,
+                )
+            )
+        elif self.option_value == 4:
+            self.add_item(
+                discord.ui.TextInput(
+                    label="Embed Color",
+                    placeholder="Enter color for embed here...",
+                    default=self.embed_data["color"],
+                    required=False,
+                )
+            )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        try:
+            await interaction.response.defer(thinking=True, ephemeral=True)
+            await interaction.followup.send("Embed Message Altered.")
+
+        except Exception as e:
+            await interaction.followup.send(e, ephemeral=True)
 
 
 async def setup(bot: MyBot):
